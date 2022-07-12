@@ -1,1 +1,12 @@
-kafka
+# checkpoint 间隔时间
+checkpointInterval: 3000
+
+# kafka 地址
+kafkaBootstrapServers: localhost:9092
+# kafka 数据源配置
+kafkaSourceTopics: event-collector
+kafkaConsumeGroupIp: es-sink-group-001
+kafkaSourceName: Kafka Source
+esServer: localhost
+kafkaSourceId: kafka-source
+mainStreamName: dataSinkToElasticSearch

@@ -32,6 +32,7 @@
         <jackson.version>2.13.0</jackson.version>
         <owner.version>1.0.12</owner.version>
         <es.version>1.15.0</es.version>
+        <fastjson.version>2.0.9</fastjson.version>
     </properties>
 
     <dependencyManagement>
@@ -125,6 +126,11 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-elasticsearch6</artifactId>
                 <version>${es.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
