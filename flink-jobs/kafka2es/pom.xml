@@ -85,6 +85,10 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-elasticsearch6</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>fastjson</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -110,7 +114,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass></mainClass>
+                            <mainClass>com.bigdata.task.Kafka2ES</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
