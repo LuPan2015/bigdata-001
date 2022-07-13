@@ -1,5 +1,10 @@
 version: '3'
 services:
+  fluent-bit:
+    image: fluent/fluent-bit:1.9
+    volumes:
+      - ./conf:/fluent-bit/etc
+    command: /fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf
   kafka:
     image: confluentinc/cp-kafka:7.0.0
     container_name: kafka
