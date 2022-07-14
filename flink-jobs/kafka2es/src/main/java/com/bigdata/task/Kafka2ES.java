@@ -57,11 +57,11 @@ public class Kafka2ES {
         // 创建 Kafka Source
         KafkaSource<String> source = KafkaSource.<String>builder()
                 .setBootstrapServers(config.getKafkaBootstrapServers())
-                .setTopics("JG-k17.searchback.t_roles")
-                //.setTopicPattern(pattern1)
+                //.setTopics("JG-k17.searchback.t_roles")
+                .setTopicPattern(pattern1)
                 //.setTopics(config.getKafkaSourceTopics())
                 .setGroupId(config.getKafkaConsumeGroupIp())
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
