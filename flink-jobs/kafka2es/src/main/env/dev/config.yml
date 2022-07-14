@@ -4,8 +4,8 @@ checkpointInterval: 3000
 # kafka 地址
 kafkaBootstrapServers: 192.168.15.10:9092
 # kafka 数据源配置
-kafkaSourceTopics: JG-k16,JG-k16
-kafkaConsumeGroupIp: es-sink-group-002
+kafkaSourceTopics: JG-k16
+kafkaConsumeGroupIp: es-sink-group-011
 kafkaSourceName: Kafka Source
 esServer: 192.168.15.10
 kafkaSourceId: kafka-source

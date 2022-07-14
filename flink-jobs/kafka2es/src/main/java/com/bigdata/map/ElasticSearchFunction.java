@@ -14,7 +14,8 @@ import org.elasticsearch.common.xcontent.XContentFactory;
 @Slf4j
 public class ElasticSearchFunction extends ProcessFunction<String, Event> {
     @Override
-    public void processElement(String s, Context context, Collector<Event> collector) throws Exception {
+    public void processElement(String s, Context context, Collector<Event> collector)  {
+        try {
             JSONObject json = JSONObject.parseObject(s);
             JSONObject after = json.getJSONObject("payload").getJSONObject("after") ;
             if (after == null){
@@ -29,8 +30,12 @@ public class ElasticSearchFunction extends ProcessFunction<String, Event> {
             Event event = new Event();
             event.setIndexName(source.getString("connector")+"-"+source.getString("db")+"-"+source.getString("table"));
             event.setType("docs");
-            event.setData(xContentBuilder.toString());
+            event.setData(after.toJSONString());
             //暂时不做任何处理
             collector.collect(event);
+        }catch (Exception e){
+            log.error(e.getMessage()+": "+s);
+        }
+
     }
 }

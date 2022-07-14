@@ -1,5 +1,6 @@
 package com.bigdata.task;
 
+import com.alibaba.fastjson.JSONObject;
 import com.bigdata.config.Config;
 import com.bigdata.map.ElasticSearchFunction;
 import com.bigdata.model.Event;
@@ -52,14 +53,15 @@ public class Kafka2ES {
         env.getCheckpointConfig().setExternalizedCheckpointCleanup(RETAIN_ON_CANCELLATION);
         env.enableCheckpointing(config.getCheckpointInterval(), CheckpointingMode.EXACTLY_ONCE);
 
-        String pattern = "JG*";
+        Pattern pattern1 = Pattern.compile("JG([-.\\w])+");
         // 创建 Kafka Source
         KafkaSource<String> source = KafkaSource.<String>builder()
                 .setBootstrapServers(config.getKafkaBootstrapServers())
-                .setTopicPattern(Pattern.compile(pattern))
+                .setTopics("JG-k17.searchback.t_roles")
+                //.setTopicPattern(pattern1)
                 //.setTopics(config.getKafkaSourceTopics())
                 .setGroupId(config.getKafkaConsumeGroupIp())
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
@@ -89,8 +91,8 @@ public class Kafka2ES {
     }
 
     private static IndexRequest createIndexRequest(Event event) {
-        Map<String, Object> json = new HashMap<>();
-        json.put("data", event.getData());
+        Map<String, Object> json = JSONObject.parseObject(event.getData());
+        //json.put("data", event.getData());
 
         return Requests.indexRequest()
                 .index(event.getIndexName())
