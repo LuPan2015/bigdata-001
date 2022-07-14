@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION;
 
@@ -51,12 +52,14 @@ public class Kafka2ES {
         env.getCheckpointConfig().setExternalizedCheckpointCleanup(RETAIN_ON_CANCELLATION);
         env.enableCheckpointing(config.getCheckpointInterval(), CheckpointingMode.EXACTLY_ONCE);
 
+        String pattern = "JG*";
         // 创建 Kafka Source
         KafkaSource<String> source = KafkaSource.<String>builder()
                 .setBootstrapServers(config.getKafkaBootstrapServers())
-                .setTopics(config.getKafkaSourceTopics())
+                .setTopicPattern(Pattern.compile(pattern))
+                //.setTopics(config.getKafkaSourceTopics())
                 .setGroupId(config.getKafkaConsumeGroupIp())
-                .setStartingOffsets(OffsetsInitializer.earliest())
+                .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
@@ -80,6 +83,7 @@ public class Kafka2ES {
                                 (event, context, indexer) ->
                                         indexer.add(createIndexRequest(event)))
                         .build());
+        //kafkaSource.print().setParallelism(1);
         final String jobName = "es Sink";
         env.execute(jobName);
     }

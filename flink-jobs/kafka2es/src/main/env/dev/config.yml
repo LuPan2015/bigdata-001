@@ -2,11 +2,11 @@
 checkpointInterval: 3000
 
 # kafka 地址
-kafkaBootstrapServers: kafka:9092
+kafkaBootstrapServers: 192.168.15.10:9092
 # kafka 数据源配置
-kafkaSourceTopics: test
-kafkaConsumeGroupIp: es-sink-group-003
+kafkaSourceTopics: JG-k16,JG-k16
+kafkaConsumeGroupIp: es-sink-group-002
 kafkaSourceName: Kafka Source
-esServer: es
+esServer: 192.168.15.10
 kafkaSourceId: kafka-source
 mainStreamName: dataSinkToElasticSearch
