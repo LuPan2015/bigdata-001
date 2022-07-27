@@ -20,4 +20,5 @@ public class Config {
     private Integer esPort = 9200;
     private String kafkaSourceId;
     private String mainStreamName;
+    private String fields;
 }

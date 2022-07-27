@@ -32,10 +32,16 @@
         <owner.version>1.0.12</owner.version>
         <es.version>1.15.0</es.version>
         <fastjson.version>2.0.9</fastjson.version>
+        <okhttp.version>4.2.0</okhttp.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>${okhttp.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.logging.log4j</groupId>
                 <artifactId>log4j-bom</artifactId>

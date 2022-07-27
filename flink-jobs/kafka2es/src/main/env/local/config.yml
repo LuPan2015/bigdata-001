@@ -10,3 +10,5 @@ kafkaSourceName: Kafka Source
 esServer: es
 kafkaSourceId: kafka-source
 mainStreamName: dataSinkToElasticSearch
+# 字段名
+fields: test.a1
