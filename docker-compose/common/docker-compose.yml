@@ -1,0 +1,90 @@
+version: '3'
+services:
+#  fluent-bit:
+#    image: fluent/fluent-bit:1.9
+#    volumes:
+#      - ./conf:/fluent-bit/etc
+#    command: /fluent-bit/bin/fluent-bit -c /fluent-bit/etc/fluent-bit.conf
+#  kafka:
+#    image: confluentinc/cp-kafka:7.0.0
+#    container_name: kafka
+#    ports:
+#      - "9092:9092"
+#      - "29092:29092"
+#    environment:
+#      KAFKA_BROKER_ID: 1
+#      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+#      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+#      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://kafka:9092
+#      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+#      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+#      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+#      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+#  zookeeper:
+#    image: confluentinc/cp-zookeeper:7.0.0
+#    hostname: zookeeper
+#    ports:
+#      - "2181:2181"
+#    environment:
+#      ZOOKEEPER_CLIENT_PORT: 2181
+#      ZOOKEEPER_TICK_TIME: 2000
+  jobmanager:
+    #image: flink:1.15.0-java11
+    image: flink:1.14.0-scala_2.12-java11
+    ports:
+      - "8081:8081"
+    command: jobmanager
+    volumes:
+      - ./flink-sql-connector-mysql-cdc-2.2.1.jar:/opt/flink/lib/flink-sql-connector-mysql-cdc-2.2.1.jar
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager        
+  taskmanager:
+    image: flink:1.14.0-scala_2.12-java11
+    #image: flink:1.15.0-java11
+    depends_on:
+      - jobmanager
+    command: taskmanager
+    volumes:
+      - ./flink-sql-connector-mysql-cdc-2.2.1.jar:/opt/flink/lib/flink-sql-connector-mysql-cdc-2.2.1.jar
+    scale: 1
+    environment:
+      - |
+        FLINK_PROPERTIES=
+        jobmanager.rpc.address: jobmanager
+        taskmanager.numberOfTaskSlots: 1  
+  dinky:
+    image: ylyue/dinky:0.6.4-flink1.15
+    #network_mode: host
+    ports:
+      - "8888:8888"
+    environment:
+      #spring.datasource.url: jdbc:mysql://localhost:3306/dlink?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+      spring.datasource.url: jdbc:mysql://192.168.31.80:3306/dlink
+      spring.datasource.username: root 
+      spring.datasource.password: 123456
+  mysql:
+    image: debezium/example-mysql:1.1
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+
+#  es:
+#    image: elasticsearch:5.6.3
+#    ports:
+#      - "9200:9200"
+#      - "9300:9300"
+#    environment:
+#      discovery.type: single-node
+#  cerebro:
+#    image: lmenezes/cerebro:0.8.3
+#    ports:
+#      - "9000:9000"
+#  neo4j: # http://localhost:7474  neo4j1/neo4j1
+#    image: neo4j:3.5.34
+#    ports:
+#      - "7474:7474"
+#      - 7687:7687
+#

@@ -15,6 +15,19 @@ import java.io.InputStream;
  */
 //@Slf4j
 public class FileUtil {
+    /**
+     * 将数据从 hdfs 转移到 gofastdfs
+     * @param hdfsPath
+     * @return
+     */
+    public static String dataDump(String hdfsPath) {
+        byte[] inputStream = FileUtil.downloadFileFromHdfs(hdfsPath);
+        String path = "";
+        String file = "";
+        String goFastDFSPath = FileUtil.uploadFileToGOFastDFS(path,inputStream,file);
+        return goFastDFSPath;
+    }
+
     static OkHttpClient client = new OkHttpClient();
     public static byte[] downloadFileFromHdfs (String url){
         //http://$IP_WEBHDFS:$PORT_WEBHDFS/webhdfs/v1/distant/path/my_distant_file?user.name=my_user&op=OPEN
@@ -83,4 +96,5 @@ public class FileUtil {
     public static void main(String[] args)throws Exception{
         test2();
     }
+
 }
