@@ -6,7 +6,7 @@ import com.bigdata.map.ProcessFunction;
 import com.bigdata.model.DataEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.RuntimeContext;
 import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
@@ -16,12 +16,19 @@ import org.apache.flink.streaming.api.CheckpointingMode;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-//import org.apache.http.HttpHost;
-//import org.elasticsearch.action.index.IndexRequest;
-//import org.elasticsearch.client.Requests;
+import org.apache.flink.streaming.connectors.elasticsearch.ElasticsearchSinkFunction;
+import org.apache.flink.streaming.connectors.elasticsearch.RequestIndexer;
+import org.apache.flink.streaming.connectors.elasticsearch5.ElasticsearchSink;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.client.Requests;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -33,7 +40,7 @@ import static org.apache.flink.streaming.api.environment.CheckpointConfig.Extern
 @Slf4j
 public class Kafka2ES {
     public static void main(String[] args) throws Exception {
-        log.info("Clickhouse Sink start");
+        log.info("elasticSearch Sink start");
         Config config = new Config();
         // 解析 yaml 文件
         URL taskFileURL = Thread.currentThread().getContextClassLoader().getResource("config.yml");
@@ -48,16 +55,14 @@ public class Kafka2ES {
         env.setParallelism(1);
 
         // 保留策略
-        //env.getCheckpointConfig().setExternalizedCheckpointCleanup(RETAIN_ON_CANCELLATION);
+        //env.getCheckpointConfig().setCheckpointingMode(RETAIN_ON_CANCELLATION);
         env.enableCheckpointing(config.getCheckpointInterval(), CheckpointingMode.EXACTLY_ONCE);
 
         Pattern pattern1 = Pattern.compile("JG([-.\\w])+");
         // 创建 Kafka Source
         KafkaSource<String> source = KafkaSource.<String>builder()
                 .setBootstrapServers(config.getKafkaBootstrapServers())
-                //.setTopics("JG-k17.searchback.t_roles")
                 .setTopicPattern(pattern1)
-                //.setTopics(config.getKafkaSourceTopics())
                 .setGroupId(config.getKafkaConsumeGroupIp())
                 .setStartingOffsets(OffsetsInitializer.latest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
@@ -79,28 +84,31 @@ public class Kafka2ES {
         // 数据上传至 gofastdfs
         mainDataStream.flatMap(new HDFS2FastDFSMapFunction(config.getFields()));
 
-//        //数据写入 ES
-//        mainDataStream.sinkTo(
-//                new Elasticsearch6SinkBuilder<DataEvent>()
-//                        .setBulkFlushMaxActions(1) // Instructs the sink to emit after every element, otherwise they would be buffered
-//                        .setHosts(new HttpHost(config.getEsServer(), config.getEsPort(), "http"))
-//                        .setEmitter(
-//                                (dataEvent, context, indexer) ->
-//                                        indexer.add(createIndexRequest(dataEvent)))
-//                        .build());
-//        kafkaSource.print().setParallelism(1);
+        Map<String, String> esConfig = new HashMap<>();
+        esConfig.put("cluster.name", config.getEsClusterName());
+        esConfig.put("bulk.flush.max.actions", "1");
+
+        List<InetSocketAddress> transportAddresses = new ArrayList<>();
+        transportAddresses.add(new InetSocketAddress(InetAddress.getByName(config.getEsServer()), config.getEsPort()));
+
+        mainDataStream.addSink(new ElasticsearchSink<DataEvent>(esConfig,transportAddresses,
+                new ElasticsearchSinkFunction<DataEvent>(){
+                    public IndexRequest createIndexRequest(DataEvent event) {
+                        String type = "docs";
+                        String index = event.getConnector()+"-"+event.getDb()+"-"+event.getTable();
+                        Map<String, Object> json = event.getData();
+                        return Requests.indexRequest()
+                            .index(index)
+                            .type(type)
+                            .source(json);
+                    }
+
+                    @Override
+                    public void process(DataEvent dataEvent, RuntimeContext runtimeContext, RequestIndexer requestIndexer) {
+                        requestIndexer.add(createIndexRequest(dataEvent));
+                    }
+                }));
         final String jobName = "es Sink";
         env.execute(jobName);
     }
-
-//    private static IndexRequest createIndexRequest(DataEvent event) {
-//        String type = "docs";
-//        String index = event.getConnector()+"-"+event.getDb()+"-"+event.getTable();
-//        Map<String, Object> json = event.getData();
-//        return Requests.indexRequest()
-//                .index(index)
-//                .type(type)
-//                .source(json);
-//    }
-
 }

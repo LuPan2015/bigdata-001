@@ -8,6 +8,7 @@ kafkaSourceTopics: test
 kafkaConsumeGroupIp: es-sink-group-003
 kafkaSourceName: Kafka Source
 esServer: es
+esClusterName: es
 kafkaSourceId: kafka-source
 mainStreamName: dataSinkToElasticSearch
 # 字段名

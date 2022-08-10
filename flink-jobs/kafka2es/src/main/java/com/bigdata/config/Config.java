@@ -21,4 +21,5 @@ public class Config {
     private String kafkaSourceId;
     private String mainStreamName;
     private String fields;
+    private String esClusterName;
 }
