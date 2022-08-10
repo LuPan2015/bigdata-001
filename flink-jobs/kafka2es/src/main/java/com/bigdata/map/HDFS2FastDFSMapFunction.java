@@ -46,28 +46,40 @@ public class HDFS2FastDFSMapFunction implements FlatMapFunction<DataEvent,DataEv
             String hdfsPath = dataEvent.getData().getString("image");
             String goFastDFSPath = Util.dataDump(hdfsPath);
             dataEvent.getData().put("image_path",goFastDFSPath);
-            
-            // 调用 ai  人脸识别服务，将图片转文字，最终存入 es
-            JSONObject ai_param = new JSONObject();
-            ai_param.put("path",goFastDFSPath);
-            String ai_url = config.getAiUrl();
-            String result = Util.callPost(ai_url,ai_param.toJSONString());
-            String image_ai_content = result;
-            dataEvent.getData().put("image_ai_content",image_ai_content);
-
-            //调用 ocr 图片服务，将图片转文字，最终存入 es
-            JSONObject ocr_param = new JSONObject();
-            ocr_param.put("path",goFastDFSPath);
-            String ocr_url = config.getOrcUrl();
-            String ocr_result = Util.callPost(ocr_url,ai_param.toJSONString());
-            String image_ocr_content = ocr_result;
-            dataEvent.getData().put("image_ocr_content",image_ocr_content);
+            // 调用 ai 和 ocr 服务
+            callAIAndOCR(dataEvent,goFastDFSPath);
         }
         if (dataEvent.getData().containsKey("video")){
+            // 数据转存
+            String hdfsPath = dataEvent.getData().getString("image");
+            String goFastDFSPath = Util.dataDump(hdfsPath);
+            // 数据切真
 
+            // 数据调用 ocr 和 ai 服务
         }
         //最终将数据流到下一个算子
         collector.collect(dataEvent);
+    }
+
+    private void callAIAndOCR(DataEvent dataEvent, String goFastDFSPath) {
+        // 调用 ai  人脸识别服务，将图片转文字，最终存入 es
+//        JSONObject ai_param = new JSONObject();
+//        ai_param.put("path",goFastDFSPath);
+        JSONObject param = new JSONObject();
+        param.put("path",goFastDFSPath);
+        
+        String ai_url = config.getAiUrl();
+        String result = Util.callPost(ai_url,param.toJSONString());
+        String image_ai_content = result;
+        dataEvent.getData().put("image_ai_content",image_ai_content);
+
+        //调用 ocr 图片服务，将图片转文字，最终存入 es
+//        JSONObject ocr_param = new JSONObject();
+//        ocr_param.put("path",goFastDFSPath);
+        String ocr_url = config.getOrcUrl();
+        String ocr_result = Util.callPost(ocr_url,param.toJSONString());
+        String image_ocr_content = ocr_result;
+        dataEvent.getData().put("image_ocr_content",image_ocr_content);
     }
 
 }
