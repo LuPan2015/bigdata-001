@@ -11,5 +11,8 @@ esServer: es
 esClusterName: es
 kafkaSourceId: kafka-source
 mainStreamName: dataSinkToElasticSearch
+orcUrl: http://IP:PORT/url
+aiUrl: http://IP:PORT/ai/recpeople
+contentUrl: http://IP:PORT/url
 # 字段名
 fields: test.a1

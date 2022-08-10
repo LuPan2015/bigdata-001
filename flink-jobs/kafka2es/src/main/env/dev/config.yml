@@ -8,5 +8,9 @@ kafkaSourceTopics: JG-k16
 kafkaConsumeGroupIp: es-sink-group-011
 kafkaSourceName: Kafka Source
 esServer: 192.168.15.10
+esClusterName: es
 kafkaSourceId: kafka-source
 mainStreamName: dataSinkToElasticSearch
+orcUrl: http://IP:PORT/url
+aiUrl: http://IP:PORT/ai/recpeople
+contentUrl: http://IP:PORT/url

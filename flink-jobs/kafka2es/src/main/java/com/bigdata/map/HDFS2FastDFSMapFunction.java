@@ -1,25 +1,25 @@
 package com.bigdata.map;
 
+import com.alibaba.fastjson.JSONObject;
+import com.bigdata.config.Config;
 import com.bigdata.model.DataEvent;
-import com.bigdata.util.FileUtil;
+import com.bigdata.util.Util;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.util.Collector;
-
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author lupan on 2022-07-27
  */
-public class HDFS2FastDFSMapFunction implements FlatMapFunction<DataEvent,Object> {
+public class HDFS2FastDFSMapFunction implements FlatMapFunction<DataEvent,DataEvent> {
 
-    private Map<String,Object> map = new HashMap<>();
-    public HDFS2FastDFSMapFunction(String fields) {
-       String[] field = fields.split(",");
-        for (String f : field) {
-            map.put(f.split(".")[0]+"_"+f.split(".")[2],"");
-        }
+ //   private Map<String,Object> map = new HashMap<>();
+    private Config config;
+    public HDFS2FastDFSMapFunction(Config config) {
+        this.config = config;
+//       String[] field = fields.split(",");
+//        for (String f : field) {
+//            map.put(f.split(".")[0]+"_"+f.split(".")[2],"");
+//        }
     }
 
     /**
@@ -31,37 +31,43 @@ public class HDFS2FastDFSMapFunction implements FlatMapFunction<DataEvent,Object
      * @throws Exception
      */
     @Override
-    public void flatMap(DataEvent dataEvent, Collector<Object> collector) throws Exception {
+    public void flatMap(DataEvent dataEvent, Collector<DataEvent> collector) throws Exception {
         if (dataEvent.getData().containsKey("content")){
-
+            //调用文本服务
+            JSONObject content_param = new JSONObject();
+            content_param.put("content",dataEvent.getData().getString("content"));
+            String contentUrl = config.getContentUrl();
+            String result = Util.callPost(contentUrl,content_param.toJSONString());
+            String content = result;
+            dataEvent.getData().put("content",content);
         }
         if (dataEvent.getData().containsKey("image")){
             //数据转存
             String hdfsPath = dataEvent.getData().getString("image");
-            String goFastDFSPath = FileUtil.dataDump(hdfsPath);
+            String goFastDFSPath = Util.dataDump(hdfsPath);
             dataEvent.getData().put("image_path",goFastDFSPath);
-            // 图片转文字
-            String image_content = "";
-            dataEvent.getData().put("image_content",image_content);
+            
+            // 调用 ai  人脸识别服务，将图片转文字，最终存入 es
+            JSONObject ai_param = new JSONObject();
+            ai_param.put("path",goFastDFSPath);
+            String ai_url = config.getAiUrl();
+            String result = Util.callPost(ai_url,ai_param.toJSONString());
+            String image_ai_content = result;
+            dataEvent.getData().put("image_ai_content",image_ai_content);
 
+            //调用 ocr 图片服务，将图片转文字，最终存入 es
+            JSONObject ocr_param = new JSONObject();
+            ocr_param.put("path",goFastDFSPath);
+            String ocr_url = config.getOrcUrl();
+            String ocr_result = Util.callPost(ocr_url,ai_param.toJSONString());
+            String image_ocr_content = ocr_result;
+            dataEvent.getData().put("image_ocr_content",image_ocr_content);
         }
         if (dataEvent.getData().containsKey("video")){
 
         }
-
-        //        String table = dataEvent.getTable();
-//        String filed = "";
-//        if (!map.containsKey(table+"_"+filed)){
-//            return;
-//        }
-//        // 做数据的上传和下载
-//        String url = map.get(table+"_"+filed).toString();
-//        // 从 hdfs 下载
-//        byte[] inputStream = FileUtil.downloadFileFromHdfs(url);
-//        String path = "";
-//        String file = "";
-//        String goFastDFSPath =FileUtil.uploadFileToGOFastDFS(path,inputStream,file);
-//        System.out.println(goFastDFSPath);
+        //最终将数据流到下一个算子
+        collector.collect(dataEvent);
     }
 
 }

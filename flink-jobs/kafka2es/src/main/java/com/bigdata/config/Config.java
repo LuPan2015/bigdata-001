@@ -22,4 +22,7 @@ public class Config {
     private String mainStreamName;
     private String fields;
     private String esClusterName;
+    private String orcUrl;
+    private String aiUrl;
+    private String contentUrl;
 }

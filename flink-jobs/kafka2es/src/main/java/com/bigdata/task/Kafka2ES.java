@@ -82,7 +82,7 @@ public class Kafka2ES {
                 .setParallelism(1);
 
         // 数据上传至 gofastdfs
-        mainDataStream.flatMap(new HDFS2FastDFSMapFunction(config.getFields()));
+        mainDataStream.flatMap(new HDFS2FastDFSMapFunction(config));
 
         Map<String, String> esConfig = new HashMap<>();
         esConfig.put("cluster.name", config.getEsClusterName());

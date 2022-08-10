@@ -3,28 +3,28 @@ package com.bigdata.util;
 
 //import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
-import org.apache.flink.runtime.rest.messages.JobAccumulatorsInfo;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author lupan on 2022-07-27
  */
 //@Slf4j
-public class FileUtil {
+public class Util {
     /**
      * 将数据从 hdfs 转移到 gofastdfs
      * @param hdfsPath
      * @return
      */
     public static String dataDump(String hdfsPath) {
-        byte[] inputStream = FileUtil.downloadFileFromHdfs(hdfsPath);
+        byte[] inputStream = Util.downloadFileFromHdfs(hdfsPath);
         String path = "";
         String file = "";
-        String goFastDFSPath = FileUtil.uploadFileToGOFastDFS(path,inputStream,file);
+        String goFastDFSPath = Util.uploadFileToGOFastDFS(path,inputStream,file);
         return goFastDFSPath;
     }
 
@@ -97,4 +97,32 @@ public class FileUtil {
         test2();
     }
 
+    /**
+     * 发送 post 请求
+     * @param url
+     * @param param
+     * @return
+     */
+    public static String callPost(String url,String param) {
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .build();
+        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"),param);
+        Request request = new Request.Builder()
+                .post(requestBody)
+                .url(url)
+                .build();
+        try {
+           Response response = okHttpClient.newCall(request).execute();
+           if (response.isSuccessful()){
+               String result = response.body().toString();
+               return result;
+           }else {
+               System.err.println(url + ", " + param + " 调用失败" );
+           }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 }
