@@ -25,4 +25,6 @@ public class Config {
     private String orcUrl;
     private String aiUrl;
     private String contentUrl;
+    private String gofastdfs;
+    private String hdfs;
 }

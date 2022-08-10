@@ -44,17 +44,16 @@ public class HDFS2FastDFSMapFunction implements FlatMapFunction<DataEvent,DataEv
         if (dataEvent.getData().containsKey("image")){
             //数据转存
             String hdfsPath = dataEvent.getData().getString("image");
-            String goFastDFSPath = Util.dataDump(hdfsPath);
+            String goFastDFSPath = Util.dataDump(config.getHdfs(),config.getGofastdfs(),hdfsPath);
             dataEvent.getData().put("image_path",goFastDFSPath);
             // 调用 ai 和 ocr 服务
             callAIAndOCR(dataEvent,goFastDFSPath);
         }
         if (dataEvent.getData().containsKey("video")){
             // 数据转存
-            String hdfsPath = dataEvent.getData().getString("image");
-            String goFastDFSPath = Util.dataDump(hdfsPath);
+            String hdfsPath = dataEvent.getData().getString("video");
+            String goFastDFSPath = Util.dataDump(config.getHdfs(),config.getGofastdfs(),hdfsPath);
             // 数据切真
-
             // 数据调用 ocr 和 ai 服务
             callAIAndOCR(dataEvent,goFastDFSPath);
         }

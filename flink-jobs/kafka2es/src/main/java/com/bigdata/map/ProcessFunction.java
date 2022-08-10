@@ -22,8 +22,8 @@ public class ProcessFunction extends org.apache.flink.streaming.api.functions.Pr
             DataEvent dataEvent  = new DataEvent();
             dataEvent.setData(after);
             dataEvent.setConnector(source.getString("connector"));
-            dataEvent.setConnector(source.getString("db"));
-            dataEvent.setConnector(source.getString("table"));
+            dataEvent.setDb(source.getString("db"));
+            dataEvent.setTable(source.getString("table"));
             collector.collect(dataEvent);
             //暂时不做任何处理
         }catch (Exception e){

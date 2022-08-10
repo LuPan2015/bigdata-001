@@ -32,8 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION;
-
 /**
  * @author lupan on 2022-07-12
  */
@@ -58,13 +56,14 @@ public class Kafka2ES {
         //env.getCheckpointConfig().setCheckpointingMode(RETAIN_ON_CANCELLATION);
         env.enableCheckpointing(config.getCheckpointInterval(), CheckpointingMode.EXACTLY_ONCE);
 
-        Pattern pattern1 = Pattern.compile("JG([-.\\w])+");
+        //Pattern pattern1 = Pattern.compile("JG([-.\\w])+");
         // 创建 Kafka Source
         KafkaSource<String> source = KafkaSource.<String>builder()
                 .setBootstrapServers(config.getKafkaBootstrapServers())
-                .setTopicPattern(pattern1)
-                .setGroupId(config.getKafkaConsumeGroupIp())
-                .setStartingOffsets(OffsetsInitializer.latest())
+                .setTopics(config.getKafkaSourceTopics())
+                //.setTopicPattern(pattern1)
+                .setGroupId(""+System.currentTimeMillis())
+                .setStartingOffsets(OffsetsInitializer.earliest())
                 .setValueOnlyDeserializer(new SimpleStringSchema())
                 .build();
 
@@ -96,6 +95,7 @@ public class Kafka2ES {
                     public IndexRequest createIndexRequest(DataEvent event) {
                         String type = "docs";
                         String index = event.getConnector()+"-"+event.getDb()+"-"+event.getTable();
+                        index = "test_abc";
                         Map<String, Object> json = event.getData();
                         return Requests.indexRequest()
                             .index(index)

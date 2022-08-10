@@ -4,13 +4,16 @@ checkpointInterval: 3000
 # kafka 地址
 kafkaBootstrapServers: 192.168.15.10:9092
 # kafka 数据源配置
-kafkaSourceTopics: JG-k16
+#kafkaSourceTopics: JG-k16
+kafkaSourceTopics: TEST_LP_1
 kafkaConsumeGroupIp: es-sink-group-011
 kafkaSourceName: Kafka Source
 esServer: 192.168.15.10
-esClusterName: es
+esClusterName: share-es-cluster
 kafkaSourceId: kafka-source
 mainStreamName: dataSinkToElasticSearch
+gofastdfs: 192.168.15.10:10001/group1/upload
+hdfs: 192.168.15.10:9870/webhdfs/v1
 orcUrl: http://IP:PORT/url
 aiUrl: http://IP:PORT/ai/recpeople
 contentUrl: http://IP:PORT/url

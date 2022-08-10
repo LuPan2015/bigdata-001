@@ -1,30 +1,29 @@
 package com.bigdata.util;
 
 
-//import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @author lupan on 2022-07-27
  */
-//@Slf4j
 public class Util {
     /**
      * 将数据从 hdfs 转移到 gofastdfs
      * @param hdfsPath
      * @return
      */
-    public static String dataDump(String hdfsPath) {
-        byte[] inputStream = Util.downloadFileFromHdfs(hdfsPath);
-        String path = "";
-        String file = "";
-        String goFastDFSPath = Util.uploadFileToGOFastDFS(path,inputStream,file);
+    public static String dataDump(String hdfsUrl,String gofastUrl,String hdfsPath) {
+        /* todo 假设 hdfs 的路径格式为: hdfs://127.0.0.1:8020/abc/test.txt
+         则需要将 /abc/test.txt 提取出来，这里先简单的以 8020 这个端口来切分。
+         实际情况待看到样例数据进行微调
+         */
+        String hp = hdfsPath.split("8020")[1];
+        byte[] inputStream = Util.downloadFileFromHdfs(hdfsUrl+hp);
+        String file = hdfsPath.split("/")[hdfsPath.split("/").length-1];
+        String goFastDFSPath = Util.uploadFileToGOFastDFS(gofastUrl,inputStream,file);
         return goFastDFSPath;
     }
 
@@ -81,7 +80,7 @@ public class Util {
      */
     public static String callPost(String url,String param) {
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
-                .connectTimeout(10, TimeUnit.SECONDS)
+                .connectTimeout(2, TimeUnit.SECONDS)
                 .build();
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/json;charset=utf-8"),param);
         Request request = new Request.Builder()

@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 /**
  * @Author: PAN.LU
+ * 测试从 hdfs 下载，再上传到 gofastdfs
  * @Date: 2022/8/10 21:00
  */
 public class Test {
@@ -30,6 +31,8 @@ public class Test {
     }
 
     public static void main(String[] args)throws Exception{
-        test2();
+        //test2();
+        String a = "hdfs://127.0.0.1:8020/abc/test.txt";
+        System.out.println(a.split("8020")[1]);
     }
 }
