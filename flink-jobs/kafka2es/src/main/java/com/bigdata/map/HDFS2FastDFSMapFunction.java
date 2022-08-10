@@ -56,26 +56,24 @@ public class HDFS2FastDFSMapFunction implements FlatMapFunction<DataEvent,DataEv
             // 数据切真
 
             // 数据调用 ocr 和 ai 服务
+            callAIAndOCR(dataEvent,goFastDFSPath);
         }
         //最终将数据流到下一个算子
         collector.collect(dataEvent);
     }
 
     private void callAIAndOCR(DataEvent dataEvent, String goFastDFSPath) {
-        // 调用 ai  人脸识别服务，将图片转文字，最终存入 es
-//        JSONObject ai_param = new JSONObject();
-//        ai_param.put("path",goFastDFSPath);
+        //请求参数
         JSONObject param = new JSONObject();
         param.put("path",goFastDFSPath);
-        
+
+        // 调用 ai  人脸识别服务，将图片转文字，最终存入 es
         String ai_url = config.getAiUrl();
         String result = Util.callPost(ai_url,param.toJSONString());
         String image_ai_content = result;
         dataEvent.getData().put("image_ai_content",image_ai_content);
 
         //调用 ocr 图片服务，将图片转文字，最终存入 es
-//        JSONObject ocr_param = new JSONObject();
-//        ocr_param.put("path",goFastDFSPath);
         String ocr_url = config.getOrcUrl();
         String ocr_result = Util.callPost(ocr_url,param.toJSONString());
         String image_ocr_content = ocr_result;
