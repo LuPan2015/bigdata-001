@@ -1,6 +1,5 @@
 package com.bigdata.model;
 
-import com.alibaba.fastjson.JSONObject;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,8 +9,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class DataEvent {
-    private String connector;
-    private String db;
-    private String table;
-    private JSONObject data;
+    private String data;
+    private String indexName;
 }

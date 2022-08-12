@@ -17,7 +17,7 @@ public class Config {
     private String kafkaConsumeGroupIp;
     private String kafkaSourceName;
     private String esServer;
-    private Integer esPort = 9200;
+    private Integer esPort = 9300;
     private String kafkaSourceId;
     private String mainStreamName;
     private String fields;
